@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
     <div class="max-w-5xl mx-auto space-y-6">
@@ -24,6 +24,25 @@
             <a href="{{ route('journals.murid') }}" class="inline-block mt-3 text-blue-600">
                 Lihat Jurnal Saya →
             </a>
+        </div>
+
+    </div>
+@endsection --}}
+@extends('layouts.app')
+
+@section('content')
+    <h1 class="text-2xl font-bold mb-4">Dashboard Murid</h1>
+
+    <div class="grid grid-cols-2 gap-4">
+
+        <div class="p-4 bg-blue-100 rounded">
+            <h2 class="text-sm text-gray-600">Total Coaching Saya</h2>
+            <p class="text-3xl font-bold">{{ $totalCoachings }}</p>
+        </div>
+
+        <div class="p-4 bg-green-100 rounded">
+            <h2 class="text-sm text-gray-600">Total Jurnal Saya</h2>
+            <p class="text-3xl font-bold">{{ $totalJournals }}</p>
         </div>
 
     </div>

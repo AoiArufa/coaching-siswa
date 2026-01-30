@@ -1,21 +1,37 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-5xl mx-auto space-y-6">
+    <h1 class="text-2xl font-bold mb-6">Dashboard Orang Tua</h1>
 
-        <h1 class="text-2xl font-bold">Dashboard Orang Tua</h1>
-
-        <div class="bg-white p-4 rounded shadow">
-            <h2 class="font-semibold mb-2">Laporan Anak</h2>
-
-            <p class="text-gray-600">
-                Silakan lihat perkembangan coaching anak Anda.
-            </p>
-
-            <a href="{{ route('journals.murid') }}" class="inline-block mt-3 text-blue-600">
-                Lihat Jurnal →
-            </a>
-        </div>
-
+    {{-- Statistik --}}
+    <div class="p-4 bg-purple-100 rounded-lg w-64 mb-6">
+        <h2 class="text-sm text-gray-600">Total Jurnal Anak</h2>
+        <p class="text-3xl font-bold text-purple-700">
+            {{ $totalJournals }}
+        </p>
     </div>
+
+    {{-- Notifikasi --}}
+    <h2 class="text-lg font-semibold mb-3">Notifikasi Terbaru</h2>
+
+    @forelse ($notifications as $notif)
+        <div class="p-3 mb-2 bg-blue-50 border-l-4 border-blue-500 rounded flex justify-between items-center">
+
+            <span>
+                {{ $notif->data['message'] ?? 'Notifikasi baru' }}
+            </span>
+
+            <form method="POST" action="{{ route('notifications.read', $notif->id) }}">
+                @csrf
+                <button class="text-xs text-blue-600 hover:underline">
+                    Tandai dibaca
+                </button>
+            </form>
+
+        </div>
+    @empty
+        <p class="text-gray-500 text-sm">
+            Tidak ada notifikasi baru
+        </p>
+    @endforelse
 @endsection

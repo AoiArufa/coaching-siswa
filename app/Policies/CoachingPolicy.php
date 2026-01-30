@@ -50,15 +50,16 @@ class CoachingPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Coaching $coaching)
+    public function update(User $user, Coaching $coaching): bool
     {
         return $user->role === 'guru'
             && $coaching->guru_id === $user->id;
     }
 
-    public function delete(User $user, Coaching $coaching)
+    public function delete(User $user, Coaching $coaching): bool
     {
-        return $this->update($user, $coaching);
+        return $user->role === 'guru'
+            && $coaching->guru_id === $user->id;
     }
 
     /**

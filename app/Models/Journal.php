@@ -17,5 +17,9 @@ class Journal extends Model
     {
         return $this->belongsTo(Coaching::class);
     }
-}
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}

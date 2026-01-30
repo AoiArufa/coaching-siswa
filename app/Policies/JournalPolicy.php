@@ -43,9 +43,10 @@ class JournalPolicy
     /**
      * Guru boleh membuat jurnal
      */
-    public function create(User $user): bool
+    public function create(User $user, Journal $journal)
     {
-        return $user->role === 'guru';
+        return $user->role === 'guru'
+            && $journal->coaching->guru_id === $user->id;
     }
 
     /**

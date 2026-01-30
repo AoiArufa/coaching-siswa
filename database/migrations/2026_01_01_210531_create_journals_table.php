@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('journals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
-            $table->text('catatan');
             $table->date('tanggal');
+            $table->text('catatan');
+            $table->text('refleksi')->nullable(); // ✅ WAJIB ADA
             $table->timestamps();
         });
-
     }
 
     /**

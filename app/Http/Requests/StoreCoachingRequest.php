@@ -14,12 +14,13 @@ class StoreCoachingRequest extends FormRequest
         return auth()->check() && auth()->user()->role === 'guru';
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
-            'murid_id' => ['required', 'exists:users,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'status' => ['required', 'in:draft,berjalan,selesai'],
+            'murid_id'  => 'required|exists:users,id',
+            'tujuan'    => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'status'    => 'required|in:draft,berjalan,selesai',
         ];
     }
 }

@@ -1,14 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-    <h2>Tambah Jurnal</h2>
+    <h1 class="text-xl font-bold mb-4">Tambah Jurnal</h1>
 
-    <form method="POST" action="{{ route('coachings.journals.store', $coaching) }}">
+    <form action="{{ route('coachings.journals.store', $coaching) }}" method="POST">
         @csrf
 
-        <textarea name="catatan" placeholder="Catatan coaching"></textarea>
-        <textarea name="refleksi" placeholder="Refleksi"></textarea>
+        <div class="mb-2">
+            <label>Tanggal</label>
+            <input type="date" name="tanggal" class="border p-2 w-full" required>
+        </div>
 
-        <button type="submit">Simpan</button>
+        <div class="mb-2">
+            <label>Catatan</label>
+            <textarea name="catatan" class="border p-2 w-full" required></textarea>
+        </div>
+
+        <div class="mb-2">
+            <label>Refleksi</label>
+            <textarea name="refleksi" class="border p-2 w-full"></textarea>
+        </div>
+
+        <button class="bg-blue-600 text-white px-4 py-2 rounded">
+            Simpan
+        </button>
     </form>
 @endsection

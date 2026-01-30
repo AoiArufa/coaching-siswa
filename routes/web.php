@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\DashboardParentController;
 use App\Http\Controllers\CoachingController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ProfileController;
@@ -11,9 +12,8 @@ use Illuminate\Support\Facades\Route;
 | Landing
 |--------------------------------------------------------------------------
 */
-Route::get('/', function () {
-    return view('landing');
-})->name('landing');
+
+Route::view('/', 'landing')->name('landing');
 
 /*
 |--------------------------------------------------------------------------
@@ -42,23 +42,26 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE: ADMIN
+    | ADMIN
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:admin')->group(function () {
 
         Route::get('/admin/dashboard', function () {
-            return view('dashboards.admin');
+            return view('dashboards.admin', [
+                'totalUsers'     => \App\Models\User::count(),
+                'totalCoachings' => \App\Models\Coaching::count(),
+                'totalJournals'  => \App\Models\Journal::count(),
+            ]);
         })->name('admin.dashboard');
 
-        // ✅ C.3.3 Activity Log
         Route::get('/admin/activity-log', [ActivityLogController::class, 'index'])
             ->name('admin.activity-log');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE: GURU
+    | GURU
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:guru')->group(function () {
@@ -67,45 +70,87 @@ Route::middleware('auth')->group(function () {
             ->name('guru.dashboard');
 
         Route::resource('coachings', CoachingController::class);
-        Route::resource('coachings.journals', JournalController::class)
-            ->except('show');
+
+        // 🔑 JURNAL (NESTED, FULL ACCESS)
+        Route::resource(
+            'coachings.journals',
+            JournalController::class
+        )->except('show');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE: MURID
+    | MURID
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:murid')->group(function () {
 
         Route::get('/murid/dashboard', function () {
-            return view('dashboards.murid');
+            return view('dashboards.murid', [
+                'totalCoachings' => \App\Models\Coaching::where('murid_id', auth()->id())->count(),
+                'totalJournals'  => \App\Models\Journal::whereHas(
+                    'coaching',
+                    fn($q) =>
+                    $q->where('murid_id', auth()->id())
+                )->count(),
+            ]);
         })->name('murid.dashboard');
-
-        Route::get('/my-journals', [JournalController::class, 'myJournals'])
-            ->name('journals.murid');
 
         Route::get('/murid/coachings', [CoachingController::class, 'forMurid'])
             ->name('murid.coachings');
 
         Route::get('/murid/coachings/{coaching}', [CoachingController::class, 'showForMurid'])
             ->name('murid.coachings.show');
+
+        // ✅ hanya STORE jurnal
+        Route::post(
+            '/murid/coachings/{coaching}/journals',
+            [JournalController::class, 'store']
+        )->name('murid.journals.store');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | ROLE: ORANG TUA
+    | ORANG TUA
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:orang_tua')->group(function () {
 
         Route::get('/ortu/dashboard', function () {
-            return view('dashboards.ortu');
+            $childrenIds = auth()->user()->children->pluck('id');
+
+            return view('dashboards.ortu', [
+                'totalJournals' => \App\Models\Journal::whereHas(
+                    'coaching.murid',
+                    fn($q) =>
+                    $q->whereIn('id', $childrenIds)
+                )->count(),
+            ]);
         })->name('ortu.dashboard');
 
         Route::get('/ortu/journals', [JournalController::class, 'forParent'])
-            ->name('ortu.journals');
+            ->name('ortu.journals.index');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PDF EXPORT (SHARED)
+    |--------------------------------------------------------------------------
+    */
+    Route::get(
+        '/coachings/{coaching}/journals/pdf',
+        [JournalController::class, 'exportPdf']
+    )->name('coachings.journals.pdf');
+
+    /*
+    |-------------------------------------------------------------------------
+    | CHARTS
+    |-------------------------------------------------------------------------
+    */
+    Route::get(
+        '/coachings/{coaching}/journals/chart',
+        [JournalController::class, 'chart']
+    )->name('coachings.journals.chart');
 
     /*
     |--------------------------------------------------------------------------
@@ -114,14 +159,13 @@ Route::middleware('auth')->group(function () {
     */
     Route::get('/redirect', function () {
         return match (auth()->user()->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'guru' => redirect()->route('guru.dashboard'),
-            'murid' => redirect()->route('murid.dashboard'),
+            'admin'     => redirect()->route('admin.dashboard'),
+            'guru'      => redirect()->route('guru.dashboard'),
+            'murid'     => redirect()->route('murid.dashboard'),
             'orang_tua' => redirect()->route('ortu.dashboard'),
-            default => abort(403),
+            default     => abort(403),
         };
     })->name('redirect');
-
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

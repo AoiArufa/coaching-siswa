@@ -15,6 +15,21 @@
             </a>
         </div>
 
+        {{-- SUMMARY --}}
+        <div class="grid grid-cols-2 gap-4 mb-6">
+
+            <div class="p-4 bg-blue-100 rounded">
+                <h2 class="text-sm text-gray-600">Total Coaching</h2>
+                <p class="text-3xl font-bold">{{ $totalCoachings }}</p>
+            </div>
+
+            <div class="p-4 bg-green-100 rounded">
+                <h2 class="text-sm text-gray-600">Total Jurnal</h2>
+                <p class="text-3xl font-bold">{{ $totalJournals }}</p>
+            </div>
+
+        </div>
+
         <!-- Content -->
         @if ($coachings->isEmpty())
             <!-- EMPTY STATE -->
@@ -33,6 +48,7 @@
             </div>
         @else
             <!-- LIST COACHING -->
+            <h2 class="text-xl font-semibold mb-2">Daftar Coaching Saya</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($coachings as $coaching)
                     <div class="bg-white rounded-lg shadow p-5">
@@ -45,6 +61,15 @@
                             <span class="font-medium">
                                 {{ ucfirst($coaching->status) }}
                             </span>
+                        </p>
+
+                        {{-- 🔹 C.11.5 — BADGE JUMLAH JURNAL --}}
+                        <p class="text-sm text-gray-600 mt-2 flex items-center gap-1">
+                            📝
+                            <span class="font-medium">
+                                {{ $coaching->journals_count }}
+                            </span>
+                            jurnal
                         </p>
 
                         <p class="text-gray-600 text-sm mt-3">
@@ -64,6 +89,27 @@
                     </div>
                 @endforeach
             </div>
+
+            {{-- <table class="w-full border">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-2">Murid</th>
+                        <th>Tujuan</th>
+                        <th>Status</th>
+                        <th>Jumlah Jurnal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($coachings as $c)
+                        <tr class="border-t">
+                            <td class="p-2">{{ $c->murid->name }}</td>
+                            <td>{{ $c->tujuan }}</td>
+                            <td>{{ ucfirst($c->status) }}</td>
+                            <td>{{ $c->journals_count }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table> --}}
         @endif
 
     </div>

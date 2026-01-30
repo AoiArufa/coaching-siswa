@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
     <div class="max-w-6xl mx-auto space-y-6">
@@ -33,6 +33,30 @@
                 </p>
             </div>
 
+        </div>
+
+    </div>
+@endsection --}}
+@extends('layouts.app')
+
+@section('content')
+    <h1 class="text-2xl font-bold mb-4">Dashboard Admin</h1>
+
+    <div class="grid grid-cols-3 gap-4">
+
+        <div class="p-4 bg-gray-100 rounded">
+            <h2 class="text-sm text-gray-600">Total User</h2>
+            <p class="text-3xl font-bold">{{ $totalUsers }}</p>
+        </div>
+
+        <div class="p-4 bg-blue-100 rounded">
+            <h2 class="text-sm text-gray-600">Total Coaching</h2>
+            <p class="text-3xl font-bold">{{ $totalCoachings }}</p>
+        </div>
+
+        <div class="p-4 bg-green-100 rounded">
+            <h2 class="text-sm text-gray-600">Total Jurnal</h2>
+            <p class="text-3xl font-bold">{{ $totalJournals }}</p>
         </div>
 
     </div>
