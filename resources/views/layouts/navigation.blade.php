@@ -4,22 +4,38 @@
     $menus = [];
 
     if (auth()->check()) {
+        // ==============================
+        // DASHBOARD
+        // ==============================
         $menus[] = [
             'label' => 'Dashboard',
             'route' => 'redirect',
             'active' => request()->routeIs('dashboard', 'redirect'),
         ];
 
-        // GURU → Coaching
+        // ==============================
+        // GURU SECTION
+        // ==============================
         if (Gate::allows('viewAny', App\Models\Coaching::class)) {
             $menus[] = [
                 'label' => 'Coaching',
                 'route' => 'coachings.index',
                 'active' => request()->routeIs('coachings.*'),
             ];
+
+            //  Analytics
+            if (Route::has('guru.analytics')) {
+                $menus[] = [
+                    'label' => 'Analytics',
+                    'route' => 'guru.analytics',
+                    'active' => request()->routeIs('guru.analytics'),
+                ];
+            }
         }
 
-        // MURID → Jurnal Saya
+        // ==============================
+        // MURID SECTION
+        // ==============================
         if (Gate::allows('view-murid-journal')) {
             $menus[] = [
                 'label' => 'Jurnal Saya',
@@ -28,7 +44,9 @@
             ];
         }
 
-        // ORANG TUA → Jurnal Anak
+        // ==============================
+        // ORANG TUA SECTION
+        // ==============================
         if (Gate::allows('view-parent-journal')) {
             $menus[] = [
                 'label' => 'Jurnal Anak',
@@ -37,7 +55,9 @@
             ];
         }
 
-        // ADMIN
+        // ==============================
+        // ADMIN SECTION
+        // ==============================
         if (Gate::allows('access-admin-panel')) {
             $menus[] = [
                 'label' => 'Admin Panel',
@@ -47,7 +67,6 @@
         }
     }
 @endphp
-
 
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

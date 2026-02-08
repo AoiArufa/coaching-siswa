@@ -2,20 +2,46 @@
 
 namespace App\Providers;
 
+use App\Models\Coaching;
+use App\Models\Journal;
+use App\Policies\CoachingPolicy;
+use App\Policies\JournalPolicy;
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    /**
+     * Register the application's policies.
+     */
+    protected $policies = [
+        Coaching::class => CoachingPolicy::class,
+        Journal::class  => JournalPolicy::class,
+    ];
+
+    /**
+     * Bootstrap any authentication / authorization services.
+     */
     public function boot(): void
     {
-        Gate::define('view-murid-journal', fn ($user) => $user->role === 'murid'
-        );
+        $this->registerPolicies();
 
-        Gate::define('view-parent-journal', fn ($user) => $user->role === 'orang_tua'
-        );
+        /*
+        |--------------------------------------------------------------------------
+        | Custom Gates (Non-Model Authorization)
+        |--------------------------------------------------------------------------
+        */
 
-        Gate::define('access-admin-panel', fn ($user) => $user->role === 'admin'
-        );
+        Gate::define('view-murid-journal', function ($user) {
+            return $user->role === 'murid';
+        });
+
+        Gate::define('view-parent-journal', function ($user) {
+            return $user->role === 'orang_tua';
+        });
+
+        Gate::define('access-admin-panel', function ($user) {
+            return $user->role === 'admin';
+        });
     }
 }

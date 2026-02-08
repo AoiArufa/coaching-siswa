@@ -12,6 +12,7 @@ class ActivityLog extends Model
         'model',
         'model_id',
         'description',
+        'ip_address',
     ];
 
     public function user()

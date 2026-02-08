@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('model');  // Coaching, Journal
             $table->unsignedBigInteger('model_id');
             $table->text('description')->nullable();
+            $table->string('ip_address')->nullable();
             $table->timestamps();
         });
-
     }
 
     /**

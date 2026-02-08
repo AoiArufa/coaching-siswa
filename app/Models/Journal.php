@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Journal extends Model
 {
     protected $fillable = [
+        'user_id',
         'coaching_id',
+        'tanggal',
         'catatan',
         'refleksi',
-        'tanggal',
     ];
 
     public function coaching()

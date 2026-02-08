@@ -4,26 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCoachingRequest;
 use App\Models\Coaching;
+use App\Models\Journal;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class CoachingController extends Controller
 {
-    /**
-     * =========================
-     * DASHBOARD GURU
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | DASHBOARD GURU
+    |--------------------------------------------------------------------------
+    */
     public function index()
     {
-        $coachings = Coaching::where('guru_id', auth()->id())
-            ->withCount('journals')   // 🔹 PENTING
+        $this->authorizeGuruGlobal();
+
+        $coachings = Coaching::with([
+            'murid:id,name'
+        ])
+            ->withCount('journals')
+            ->where('guru_id', auth()->id())
             ->latest()
             ->get();
 
-        $totalCoachings = Coaching::where('guru_id', auth()->id())->count();
+        $totalCoachings = $coachings->count();
 
-        $totalJournals = \App\Models\Journal::whereHas('coaching', function ($q) {
+        $totalJournals = Journal::whereHas('coaching', function ($q) {
             $q->where('guru_id', auth()->id());
         })->count();
 
@@ -34,25 +41,66 @@ class CoachingController extends Controller
         ));
     }
 
-    /**
-     * =========================
-     * FORM TAMBAH COACHING
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | ANALYTICS DASHBOARD GURU
+    |--------------------------------------------------------------------------
+    */
+    public function analytics()
+    {
+        $this->authorizeGuruGlobal();
+
+        $totalCoachings = Coaching::where('guru_id', auth()->id())->count();
+
+        $totalJournals = Journal::whereHas('coaching', function ($q) {
+            $q->where('guru_id', auth()->id());
+        })->count();
+
+        $avgPerCoaching = $totalCoachings > 0
+            ? round($totalJournals / $totalCoachings, 1)
+            : 0;
+
+        $chartData = Journal::whereHas('coaching', function ($q) {
+            $q->where('guru_id', auth()->id());
+        })
+            ->selectRaw('DATE_FORMAT(tanggal, "%Y-%m") as month, COUNT(*) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month');
+
+        return view('guru.analytics', compact(
+            'totalCoachings',
+            'totalJournals',
+            'avgPerCoaching',
+            'chartData'
+        ));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FORM CREATE
+    |--------------------------------------------------------------------------
+    */
     public function create()
     {
-        $murids = User::where('role', 'murid')->get();
+        $this->authorizeGuruGlobal();
+
+        $murids = User::where('role', 'murid')
+            ->orderBy('name')
+            ->get();
 
         return view('coachings.create', compact('murids'));
     }
 
-    /**
-     * =========================
-     * SIMPAN COACHING
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | STORE
+    |--------------------------------------------------------------------------
+    */
     public function store(StoreCoachingRequest $request)
     {
+        $this->authorizeGuruGlobal();
+
         $coaching = Coaching::create([
             'guru_id'   => auth()->id(),
             'murid_id'  => $request->murid_id,
@@ -61,7 +109,6 @@ class CoachingController extends Controller
             'status'    => 'draft',
         ]);
 
-        // ✅ C.3.2 — Activity Log
         activity_log('create', $coaching, 'Membuat coaching');
 
         return redirect()
@@ -69,33 +116,79 @@ class CoachingController extends Controller
             ->with('success', 'Coaching berhasil dibuat');
     }
 
-    /**
-     * =========================
-     * DETAIL COACHING (GURU)
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | DETAIL COACHING (GURU)
+    |--------------------------------------------------------------------------
+    */
     public function show(Coaching $coaching)
     {
-        $sort = request('sort', 'latest'); // default: latest
+        $this->authorizeGuru($coaching);
 
-        $query = $coaching->journals();
+        $coaching->load([
+            'murid:id,name',
+            'journals.user:id,name'
+        ]);
 
-        if ($sort === 'oldest') {
-            $query->orderBy('tanggal', 'asc');
-        } else {
-            $query->orderBy('tanggal', 'desc'); // latest
-        }
+        $sort = request('sort', 'latest');
 
-        $journals = $query->paginate(5)->withQueryString();
+        $journals = $coaching->journals()
+            ->when(
+                $sort === 'oldest',
+                fn($q) => $q->orderBy('tanggal', 'asc'),
+                fn($q) => $q->orderBy('tanggal', 'desc')
+            )
+            ->paginate(5)
+            ->withQueryString();
 
-        return view('coachings.show', compact('coaching', 'journals', 'sort'));
+        /*
+        |--------------------------------------------------------------------------
+        | SUMMARY
+        |--------------------------------------------------------------------------
+        */
+
+        $summaryData = $coaching->journals()
+            ->select('tanggal')
+            ->orderBy('tanggal')
+            ->get();
+
+        $total = $summaryData->count();
+
+        $firstDate = optional($summaryData->first())->tanggal;
+        $lastDate  = optional($summaryData->last())->tanggal;
+
+        $months = $summaryData->groupBy(function ($item) {
+            return Carbon::parse($item->tanggal)->format('Y-m');
+        })->count();
+
+        $avgPerMonth = $months > 0
+            ? round($total / $months, 1)
+            : 0;
+
+        $summary = [
+            'total'         => $total,
+            'first_date'    => $firstDate,
+            'last_date'     => $lastDate,
+            'months'        => $months,
+            'avg_per_month' => $avgPerMonth,
+        ];
+
+        $progress = min($total * 10, 100);
+
+        return view('coachings.show', compact(
+            'coaching',
+            'journals',
+            'sort',
+            'summary',
+            'progress'
+        ));
     }
 
-    /**
-     * =========================
-     * FORM EDIT
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | EDIT
+    |--------------------------------------------------------------------------
+    */
     public function edit(Coaching $coaching)
     {
         $this->authorizeGuru($coaching);
@@ -103,11 +196,11 @@ class CoachingController extends Controller
         return view('coachings.edit', compact('coaching'));
     }
 
-    /**
-     * =========================
-     * UPDATE COACHING
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | UPDATE
+    |--------------------------------------------------------------------------
+    */
     public function update(Request $request, Coaching $coaching)
     {
         $this->authorizeGuru($coaching);
@@ -127,27 +220,65 @@ class CoachingController extends Controller
             ->with('success', 'Coaching berhasil diperbarui');
     }
 
-    /**
-     * =========================
-     * HAPUS COACHING
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | DELETE
+    |--------------------------------------------------------------------------
+    */
     public function destroy(Coaching $coaching)
     {
         $this->authorizeGuru($coaching);
 
-        $coaching->delete();
-
         activity_log('delete', $coaching, 'Menghapus coaching');
 
-        return back()->with('success', 'Coaching dihapus');
+        $coaching->delete();
+
+        return redirect()
+            ->route('coachings.index')
+            ->with('success', 'Coaching berhasil dihapus');
     }
 
-    /**
-     * =========================
-     * AUTHORIZATION MANUAL
-     * =========================
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | MURID SECTION
+    |--------------------------------------------------------------------------
+    */
+    public function forMurid()
+    {
+        abort_if(auth()->user()->role !== 'murid', 403);
+
+        $coachings = Coaching::where('murid_id', auth()->id())
+            ->withCount('journals')
+            ->latest()
+            ->get();
+
+        return view('murid.coachings.index', compact('coachings'));
+    }
+
+    public function showForMurid(Coaching $coaching)
+    {
+        abort_if(
+            auth()->user()->role !== 'murid' ||
+                $coaching->murid_id !== auth()->id(),
+            403
+        );
+
+        $journals = $coaching->journals()
+            ->with('user:id,name')
+            ->orderByDesc('tanggal')
+            ->paginate(5);
+
+        return view('murid.coachings.show', compact(
+            'coaching',
+            'journals'
+        ));
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | AUTHORIZATION HELPERS
+    |--------------------------------------------------------------------------
+    */
     protected function authorizeGuru(Coaching $coaching)
     {
         abort_if(
@@ -157,27 +288,8 @@ class CoachingController extends Controller
         );
     }
 
-    /**
-     * =========================
-     * MURID: LIST COACHING
-     * =========================
-     */
-    public function forMurid()
+    protected function authorizeGuruGlobal()
     {
-        $coachings = Coaching::where('murid_id', auth()->id())->get();
-
-        return view('murid.coachings.index', compact('coachings'));
-    }
-
-    /**
-     * =========================
-     * MURID: DETAIL COACHING
-     * =========================
-     */
-    public function showForMurid(Coaching $coaching)
-    {
-        abort_if($coaching->murid_id !== auth()->id(), 403);
-
-        return view('coachings.show', compact('coaching'));
+        abort_if(auth()->user()->role !== 'guru', 403);
     }
 }

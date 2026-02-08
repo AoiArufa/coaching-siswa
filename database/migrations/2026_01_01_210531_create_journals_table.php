@@ -14,9 +14,12 @@ return new class extends Migration
         Schema::create('journals', function (Blueprint $table) {
             $table->id();
             $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
-            $table->date('tanggal');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->date('tanggal')->index();
             $table->text('catatan');
-            $table->text('refleksi')->nullable(); // ✅ WAJIB ADA
+            $table->text('refleksi')->nullable();
+            $table->index('tanggal');               // Untuk filter by date, tambahan jika perlu
+            $table->index('coaching_id');           // Untuk query relasi dengan coaching, tambahan jika perlu
             $table->timestamps();
         });
     }

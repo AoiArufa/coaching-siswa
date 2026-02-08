@@ -19,6 +19,10 @@ return new class extends Migration
             $table->text('deskripsi')->nullable();
             $table->enum('status', ['draft', 'berjalan', 'selesai'])->default('draft');
             $table->timestamps();
+
+            $table->index('guru_id');
+            $table->index('murid_id');
+            $table->index('status');
         });
     }
 

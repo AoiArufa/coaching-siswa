@@ -18,25 +18,41 @@ class CoachingPolicy
     /**
      * Determine whether the user can view the model.
      */
+    // public function view(User $user, Coaching $coaching)
+    // {
+    //     // guru pemilik
+    //     if ($user->role === 'guru' && $coaching->guru_id === $user->id) {
+    //         return true;
+    //     }
+
+    //     // murid terkait
+    //     if ($user->role === 'murid' && $coaching->murid_id === $user->id) {
+    //         return true;
+    //     }
+
+    //     // orang tua murid
+    //     if ($user->role === 'orang_tua' && $coaching->murid->parent_id === $user->id) {
+    //         return true;
+    //     }
+
+    //     // admin
+    //     return $user->role === 'admin';
+    // }
     public function view(User $user, Coaching $coaching)
     {
-        // guru pemilik
-        if ($user->role === 'guru' && $coaching->guru_id === $user->id) {
-            return true;
+        if ($user->role === 'guru') {
+            return $coaching->guru_id === $user->id;
         }
 
-        // murid terkait
-        if ($user->role === 'murid' && $coaching->murid_id === $user->id) {
-            return true;
+        if ($user->role === 'murid') {
+            return $coaching->murid_id === $user->id;
         }
 
-        // orang tua murid
-        if ($user->role === 'orang_tua' && $coaching->murid->parent_id === $user->id) {
-            return true;
+        if ($user->role === 'orang_tua') {
+            return $user->children->contains('id', $coaching->murid_id);
         }
 
-        // admin
-        return $user->role === 'admin';
+        return false;
     }
 
     /**
@@ -50,16 +66,25 @@ class CoachingPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Coaching $coaching): bool
+    // public function update(User $user, Coaching $coaching): bool
+    // {
+    //     return $user->role === 'guru'
+    //         && $coaching->guru_id === $user->id;
+    // }
+    public function update(User $user, Coaching $coaching)
     {
         return $user->role === 'guru'
             && $coaching->guru_id === $user->id;
     }
 
-    public function delete(User $user, Coaching $coaching): bool
+    // public function delete(User $user, Coaching $coaching): bool
+    // {
+    //     return $user->role === 'guru'
+    //         && $coaching->guru_id === $user->id;
+    // }
+    public function delete(User $user, Coaching $coaching)
     {
-        return $user->role === 'guru'
-            && $coaching->guru_id === $user->id;
+        return $this->update($user, $coaching);
     }
 
     /**
