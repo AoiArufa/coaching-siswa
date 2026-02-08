@@ -145,14 +145,30 @@ Route::middleware('auth')->group(function () {
         ->group(function () {
 
             Route::get('/dashboard', function () {
-                $childrenIds = auth()->user()->children->pluck('id');
 
-                return view('dashboards.ortu', [
-                    'totalJournals' => \App\Models\Journal::whereHas(
-                        'coaching.murid',
-                        fn($q) => $q->whereIn('id', $childrenIds)
-                    )->count(),
-                ]);
+                $user = auth()->user();
+
+                $childrenIds = $user->children->pluck('id');
+
+                $totalJournals = \App\Models\Journal::whereHas(
+                    'coaching.murid',
+                    fn($q) => $q->whereIn('id', $childrenIds)
+                )->count();
+
+                $notifications = $user->notifications()
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+                $notifications = $user->unreadNotifications()
+                    ->latest()
+                    ->take(5)
+                    ->get();
+
+                return view('dashboards.ortu', compact(
+                    'totalJournals',
+                    'notifications'
+                ));
             })->name('dashboard');
 
             Route::get('/journals', [JournalController::class, 'forParent'])
