@@ -13,26 +13,16 @@
                 </p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex flex-wrap items-center gap-3">
 
                 {{-- Status Badge --}}
                 <span
                     class="px-3 py-1 text-xs rounded-full
-                @if ($coaching->status === 'draft') bg-gray-200 text-gray-700
-                @elseif($coaching->status === 'berjalan') bg-yellow-100 text-yellow-700
-                @else bg-green-100 text-green-700 @endif">
+                @if ($coaching->status === 'ongoing') bg-yellow-100 text-yellow-700
+                @elseif($coaching->status === 'completed') bg-green-100 text-green-700
+                @else bg-gray-200 text-gray-700 @endif">
                     {{ ucfirst($coaching->status) }}
                 </span>
-
-                {{-- Action Buttons --}}
-                @can('update', $coaching)
-                    @if (Route::has('coachings.journals.create'))
-                        <a href="{{ route('coachings.journals.create', $coaching) }}"
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition">
-                            + Tambah Jurnal
-                        </a>
-                    @endif
-                @endcan
 
                 @if (Route::has('coachings.journals.pdf'))
                     <a href="{{ route('coachings.journals.pdf', [
@@ -44,8 +34,88 @@
                         Export PDF
                     </a>
                 @endif
+
+                {{-- Tambah Sesi (Terkunci jika completed) --}}
+                @if ($coaching->status !== 'completed')
+                    <a href="{{ route('sessions.create', $coaching) }}"
+                        class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm transition">
+                        + Tambah Sesi
+                    </a>
+                @endif
+
+                {{-- Tambah Jurnal --}}
+                @can('update', $coaching)
+                    @if ($coaching->status !== 'completed')
+                        <a href="{{ route('coachings.journals.create', $coaching) }}"
+                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition">
+                            + Tambah Jurnal
+                        </a>
+                    @endif
+                @endcan
+
+                {{-- ================= D.10.7 TOMBOL SELESAIKAN ================= --}}
+                @if ($progress == 100 && $coaching->status !== 'completed')
+                    <a href="{{ route('coachings.complete.form', $coaching) }}"
+                        class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded text-sm transition">
+                        Selesaikan Coaching
+                    </a>
+                @endif
+
+                @if ($coaching->status === 'completed')
+                    <a href="{{ route('coachings.report', $coaching) }}"
+                        class="px-4 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded text-sm transition">
+                        Lihat Laporan
+                    </a>
+                @endif
+
             </div>
         </div>
+
+
+        {{-- ================= PROGRESS ================= --}}
+        <div class="bg-gray-50 rounded-xl p-4 mb-8 border">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-semibold text-sm text-gray-600">
+                    Progress Coaching
+                </h3>
+                <span class="text-sm font-medium text-blue-600">
+                    {{ $progress }}%
+                </span>
+            </div>
+
+            <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: {{ $progress }}%">
+                </div>
+            </div>
+        </div>
+
+
+        {{-- ================= SESSIONS PER STAGE ================= --}}
+        <div class="mb-10">
+            <h3 class="text-lg font-semibold mb-4">Tahapan & Sesi Coaching</h3>
+
+            @foreach ($coaching->sessions->groupBy('stage.name') as $stage => $sessions)
+                <div class="mb-6 border rounded-lg p-4 bg-gray-50">
+
+                    <h4 class="font-semibold text-gray-700 mb-3">
+                        {{ $stage }}
+                    </h4>
+
+                    @foreach ($sessions as $session)
+                        <div class="mb-3 p-3 bg-white rounded shadow-sm text-sm">
+                            <p class="text-gray-500 text-xs">
+                                {{ \Carbon\Carbon::parse($session->session_date)->format('d M Y') }}
+                            </p>
+                            <p class="mt-1 whitespace-pre-line">
+                                {{ $session->notes }}
+                            </p>
+                        </div>
+                    @endforeach
+
+                </div>
+            @endforeach
+        </div>
+
 
         {{-- ================= FILTER ================= --}}
         <form method="GET" class="flex flex-wrap gap-3 mb-6 items-end">
@@ -53,14 +123,15 @@
             <div>
                 <label class="text-xs text-gray-500">Urutkan</label>
                 <select name="sort" class="border rounded px-3 py-2 text-sm">
-                    <option value="latest" @selected(request('sort', 'latest') === 'latest')>Terbaru</option>
-                    <option value="oldest" @selected(request('sort') === 'oldest')>Terlama</option>
+                    <option value="latest" @selected(request('sort', 'latest') == 'latest')>Terbaru</option>
+                    <option value="oldest" @selected(request('sort') == 'oldest')>Terlama</option>
                 </select>
             </div>
 
             <div>
                 <label class="text-xs text-gray-500">Dari</label>
-                <input type="date" name="from" value="{{ request('from') }}" class="border rounded px-3 py-2 text-sm">
+                <input type="date" name="from" value="{{ request('from') }}"
+                    class="border rounded px-3 py-2 text-sm">
             </div>
 
             <div>
@@ -79,57 +150,8 @@
             @endif
         </form>
 
-        {{-- ================= PROGRESS ================= --}}
-        <div class="bg-gray-50 rounded-xl p-4 mb-6 border">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-semibold text-gray-700 text-sm">
-                    Progress Coaching
-                </h3>
-                <span class="text-sm font-medium text-blue-600">
-                    {{ $progress }}%
-                </span>
-            </div>
 
-            <div class="w-full bg-gray-200 rounded-full h-3">
-                <div class="bg-blue-600 h-3 rounded-full transition-all duration-500" style="width: {{ $progress }}%">
-                </div>
-            </div>
-        </div>
-
-        {{-- ================= SUMMARY ================= --}}
-        <div class="grid md:grid-cols-5 gap-4 mb-6 text-sm">
-
-            <div class="bg-gray-100 p-4 rounded">
-                <p class="text-gray-500">Total Jurnal</p>
-                <p class="text-lg font-semibold">{{ $summary['total'] }}</p>
-            </div>
-
-            <div class="bg-gray-100 p-4 rounded">
-                <p class="text-gray-500">Awal</p>
-                <p class="font-semibold">
-                    {{ $summary['first_date'] ? \Carbon\Carbon::parse($summary['first_date'])->format('d M Y') : '-' }}
-                </p>
-            </div>
-
-            <div class="bg-gray-100 p-4 rounded">
-                <p class="text-gray-500">Terakhir</p>
-                <p class="font-semibold">
-                    {{ $summary['last_date'] ? \Carbon\Carbon::parse($summary['last_date'])->format('d M Y') : '-' }}
-                </p>
-            </div>
-
-            <div class="bg-gray-100 p-4 rounded">
-                <p class="text-gray-500">Jumlah Bulan Aktif</p>
-                <p class="font-semibold">{{ $summary['months'] }}</p>
-            </div>
-
-            <div class="bg-gray-100 p-4 rounded">
-                <p class="text-gray-500">Rata-rata / Bulan</p>
-                <p class="font-semibold">{{ $summary['avg_per_month'] }}</p>
-            </div>
-        </div>
-
-        {{-- ================= LIST ================= --}}
+        {{-- ================= LIST JURNAL ================= --}}
         @forelse ($journals as $journal)
             <div class="border rounded-lg p-4 mb-4 hover:shadow-sm transition">
 
@@ -149,15 +171,14 @@
                 @endif
 
                 @can('update', $journal)
-                    <div class="mt-3 flex gap-4 text-sm">
-                        @if (Route::has('coachings.journals.edit'))
+                    @if ($coaching->status !== 'completed')
+                        <div class="mt-3 flex gap-4 text-sm">
+
                             <a href="{{ route('coachings.journals.edit', [$coaching, $journal]) }}"
                                 class="text-blue-600 hover:underline">
                                 Edit
                             </a>
-                        @endif
 
-                        @if (Route::has('coachings.journals.destroy'))
                             <form method="POST" action="{{ route('coachings.journals.destroy', [$coaching, $journal]) }}"
                                 onsubmit="return confirm('Hapus jurnal ini?')">
                                 @csrf
@@ -166,15 +187,18 @@
                                     Hapus
                                 </button>
                             </form>
-                        @endif
-                    </div>
+
+                        </div>
+                    @endif
                 @endcan
+
             </div>
         @empty
             <div class="text-center text-gray-500 py-10">
                 Belum ada jurnal pada rentang ini.
             </div>
         @endforelse
+
 
         {{-- ================= PAGINATION ================= --}}
         <div class="mt-6">

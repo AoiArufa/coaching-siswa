@@ -238,6 +238,50 @@ class CoachingController extends Controller
             ->with('success', 'Coaching berhasil dihapus');
     }
 
+    public function completeForm(Coaching $coaching)
+    {
+        if ($coaching->progressPercentage() < 100) {
+            return redirect()
+                ->route('coachings.show', $coaching)
+                ->with('error', 'Semua tahap belum selesai.');
+        }
+
+        return view('coachings.complete', compact('coaching'));
+    }
+
+    public function complete(Request $request, Coaching $coaching)
+    {
+        if ($coaching->progressPercentage() < 100) {
+            return back()->with('error', 'Progress belum 100%.');
+        }
+
+        $request->validate([
+            'final_evaluation' => 'required'
+        ]);
+
+        $coaching->update([
+            'final_evaluation' => $request->final_evaluation,
+            'status' => 'completed',
+            'completed_at' => now()
+        ]);
+
+        return redirect()
+            ->route('coachings.show', $coaching)
+            ->with('success', 'Coaching berhasil diselesaikan.');
+    }
+
+    public function report(Coaching $coaching)
+    {
+        $this->authorize('view', $coaching);
+
+        $coaching->load([
+            'sessions.stage',
+            'journals'
+        ]);
+
+        return view('coachings.report', compact('coaching'));
+    }
+
     /*
     |--------------------------------------------------------------------------
     | MURID SECTION

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CoachingController;
+use App\Http\Controllers\CoachingSessionController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -16,7 +17,7 @@ Route::view('/', 'landing')->name('landing');
 
 /*
 |--------------------------------------------------------------------------
-| Dashboard (Redirect Global)
+| Dashboard Redirect Global
 |--------------------------------------------------------------------------
 */
 
@@ -75,24 +76,49 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:guru')
         ->prefix('guru')
+        ->name('guru.')
         ->group(function () {
 
             // Dashboard
             Route::get('/dashboard', [CoachingController::class, 'index'])
                 ->name('dashboard');
-            Route::get(
-                '/guru/dashboard',
-                [App\Http\Controllers\CoachingController::class, 'index']
-            )->name('guru.dashboard');
 
             // Analytics
             Route::get('/analytics', [CoachingController::class, 'analytics'])
                 ->name('analytics');
 
-            // Resource Coaching
+            // Coaching Resource
             Route::resource('coachings', CoachingController::class);
 
-            // Nested Journals (Full Access)
+            // Sessions
+            Route::get(
+                'coachings/{coaching}/sessions/create',
+                [CoachingSessionController::class, 'create']
+            )->name('sessions.create');
+
+            Route::post(
+                'coachings/{coaching}/sessions',
+                [CoachingSessionController::class, 'store']
+            )->name('sessions.store');
+
+            // Complete Coaching
+            Route::get(
+                'coachings/{coaching}/complete',
+                [CoachingController::class, 'completeForm']
+            )->name('coachings.complete.form');
+
+            Route::post(
+                'coachings/{coaching}/complete',
+                [CoachingController::class, 'complete']
+            )->name('coachings.complete');
+
+            // Report
+            Route::get(
+                'coachings/{coaching}/report',
+                [CoachingController::class, 'report']
+            )->name('coachings.report');
+
+            // Nested Journals
             Route::resource(
                 'coachings.journals',
                 JournalController::class
@@ -126,7 +152,6 @@ Route::middleware('auth')->group(function () {
             Route::get('/coachings/{coaching}', [CoachingController::class, 'showForMurid'])
                 ->name('coachings.show');
 
-            // Murid hanya bisa STORE jurnal
             Route::post(
                 '/coachings/{coaching}/journals',
                 [JournalController::class, 'store']
@@ -147,18 +172,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/dashboard', function () {
 
                 $user = auth()->user();
-
                 $childrenIds = $user->children->pluck('id');
 
                 $totalJournals = \App\Models\Journal::whereHas(
                     'coaching.murid',
                     fn($q) => $q->whereIn('id', $childrenIds)
                 )->count();
-
-                $notifications = $user->notifications()
-                    ->latest()
-                    ->take(5)
-                    ->get();
 
                 $notifications = $user->unreadNotifications()
                     ->latest()
@@ -177,17 +196,15 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | SHARED FEATURES (AUTH ONLY)
+    | Shared (Auth Only)
     |--------------------------------------------------------------------------
     */
 
-    // Export PDF
     Route::get(
         '/coachings/{coaching}/journals/pdf',
         [JournalController::class, 'exportPdf']
     )->name('coachings.journals.pdf');
 
-    // Chart
     Route::get(
         '/coachings/{coaching}/journals/chart',
         [JournalController::class, 'chart']
@@ -211,3 +228,5 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+
+// update file

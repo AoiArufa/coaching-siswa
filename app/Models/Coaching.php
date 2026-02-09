@@ -13,6 +13,11 @@ class Coaching extends Model
         'tujuan',
         'deskripsi',
         'status',
+        'user_id',
+        'title',
+        'description',
+        'final_evaluation',
+        'completed_at'
     ];
 
     public function sessions()
