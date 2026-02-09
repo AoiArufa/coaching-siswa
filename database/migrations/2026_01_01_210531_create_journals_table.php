@@ -11,17 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('journals', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->date('tanggal')->index();
-            $table->text('catatan');
-            $table->text('refleksi')->nullable();
-            $table->index('tanggal');               // Untuk filter by date, tambahan jika perlu
-            $table->index('coaching_id');           // Untuk query relasi dengan coaching, tambahan jika perlu
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('journals')) {
+            Schema::create('journals', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->date('tanggal')->index();
+                $table->text('catatan');
+                $table->text('refleksi')->nullable();
+                $table->index('tanggal');               // Untuk filter by date, tambahan jika perlu
+                $table->index('coaching_id');           // Untuk query relasi dengan coaching, tambahan jika perlu
+                $table->timestamps();
+            });
+        }
     }
 
     /**

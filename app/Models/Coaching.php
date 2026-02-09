@@ -15,6 +15,29 @@ class Coaching extends Model
         'status',
     ];
 
+    public function sessions()
+    {
+        return $this->hasMany(CoachingSession::class);
+    }
+
+    public function progressPercentage()
+    {
+        $totalStages = CoachingStage::count();
+
+        if ($totalStages == 0) {
+            return 0;
+        }
+
+        $completedStages = $this->sessions()
+            ->with('stage')
+            ->get()
+            ->pluck('stage.id')
+            ->unique()
+            ->count();
+
+        return round(($completedStages / $totalStages) * 100);
+    }
+
     public function guru()
     {
         return $this->belongsTo(User::class, 'guru_id');
