@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\CoachingController;
 use App\Http\Controllers\CoachingSessionController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MaterialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -76,16 +77,15 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('role:guru')
         ->prefix('guru')
-        ->name('guru.')
         ->group(function () {
 
             // Dashboard
             Route::get('/dashboard', [CoachingController::class, 'index'])
-                ->name('dashboard');
+                ->name('guru.dashboard');
 
             // Analytics
             Route::get('/analytics', [CoachingController::class, 'analytics'])
-                ->name('analytics');
+                ->name('guru.analytics');
 
             // Coaching Resource
             Route::resource('coachings', CoachingController::class);
@@ -123,6 +123,11 @@ Route::middleware('auth')->group(function () {
                 'coachings.journals',
                 JournalController::class
             )->except('show');
+
+            Route::resource(
+                'coachings.materials',
+                \App\Http\Controllers\MaterialController::class
+            )->except('show');
         });
 
     /*
@@ -156,6 +161,11 @@ Route::middleware('auth')->group(function () {
                 '/coachings/{coaching}/journals',
                 [JournalController::class, 'store']
             )->name('journals.store');
+
+            Route::get(
+                '/coachings/{coaching}/materials',
+                [\App\Http\Controllers\MaterialController::class, 'index']
+            )->name('coachings.materials.index');
         });
 
     /*
@@ -192,6 +202,11 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/journals', [JournalController::class, 'forParent'])
                 ->name('journals.index');
+
+            Route::get(
+                '/coachings/{coaching}/materials',
+                [\App\Http\Controllers\MaterialController::class, 'index']
+            )->name('coachings.materials.index');
         });
 
     /*

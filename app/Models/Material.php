@@ -4,18 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Journal extends Model
+class Material extends Model
 {
     protected $fillable = [
-        'user_id',
         'coaching_id',
-        'tanggal',
-        'catatan',
-        'refleksi',
-    ];
-
-    protected $casts = [
-        'tanggal' => 'date',
+        'user_id',
+        'title',
+        'description',
+        'file_path',
+        'external_link',
     ];
 
     public function coaching()

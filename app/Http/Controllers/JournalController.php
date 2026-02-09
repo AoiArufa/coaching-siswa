@@ -41,6 +41,7 @@ class JournalController extends Controller
     public function create(Coaching $coaching)
     {
         $this->authorizeGuru($coaching);
+        $this->abortIfCompleted($coaching);
 
         return view('journals.create', compact('coaching'));
     }
@@ -53,8 +54,8 @@ class JournalController extends Controller
     public function store(StoreJournalRequest $request, Coaching $coaching)
     {
         $this->authorizeGuru($coaching);
+        $this->abortIfCompleted($coaching);
 
-        // WAJIB ADA
         $validated = $request->validated();
 
         $journal = $coaching->journals()->create([
@@ -64,21 +65,17 @@ class JournalController extends Controller
             'refleksi' => $validated['refleksi'] ?? null,
         ]);
 
-        $this->logActivity(
-            'create',
-            $journal,
-            'Menambahkan jurnal coaching'
-        );
+        $this->logActivity('create', $journal, 'Menambahkan jurnal coaching');
 
+        // Notifikasi ke orang tua (jika ada)
         $parent = optional($coaching->murid)->parent;
-
         if ($parent) {
             $parent->notify(new JournalCreated($journal));
         }
 
         return redirect()
-            ->route('coachings.show', $coaching)
-            ->with('success', 'Jurnal berhasil ditambahkan');
+            ->route('guru.coachings.show', $coaching)
+            ->with('success', 'Jurnal berhasil ditambahkan.');
     }
 
     /*
@@ -90,6 +87,7 @@ class JournalController extends Controller
     {
         $this->authorizeGuru($coaching);
         $this->validateJournalOwnership($coaching, $journal);
+        $this->abortIfCompleted($coaching);
 
         return view('journals.edit', compact('coaching', 'journal'));
     }
@@ -103,14 +101,15 @@ class JournalController extends Controller
     {
         $this->authorizeGuru($coaching);
         $this->validateJournalOwnership($coaching, $journal);
+        $this->abortIfCompleted($coaching);
 
         $journal->update($request->validated());
 
         $this->logActivity('update', $journal, 'Mengubah jurnal coaching');
 
         return redirect()
-            ->route('coachings.show', $coaching)
-            ->with('success', 'Jurnal berhasil diperbarui');
+            ->route('guru.coachings.show', $coaching)
+            ->with('success', 'Jurnal berhasil diperbarui.');
     }
 
     /*
@@ -122,12 +121,13 @@ class JournalController extends Controller
     {
         $this->authorizeGuru($coaching);
         $this->validateJournalOwnership($coaching, $journal);
+        $this->abortIfCompleted($coaching);
 
         $this->logActivity('delete', $journal, 'Menghapus jurnal coaching');
 
         $journal->delete();
 
-        return back()->with('success', 'Jurnal berhasil dihapus');
+        return back()->with('success', 'Jurnal berhasil dihapus.');
     }
 
     /*
@@ -182,11 +182,9 @@ class JournalController extends Controller
     {
         abort_unless(auth()->user()->role === 'murid', 403);
 
-        $query = Journal::whereHas(
-            'coaching',
-            fn($q) =>
-            $q->where('murid_id', auth()->id())
-        );
+        $query = Journal::whereHas('coaching', function ($q) {
+            $q->where('murid_id', auth()->id());
+        });
 
         $journals = $this->filteredQuery($request, $query)
             ->with(['coaching.guru:id,name'])
@@ -208,11 +206,9 @@ class JournalController extends Controller
     {
         abort_unless(auth()->user()->role === 'orang_tua', 403);
 
-        $query = Journal::whereHas(
-            'coaching.murid',
-            fn($q) =>
-            $q->where('parent_id', auth()->id())
-        );
+        $query = Journal::whereHas('coaching.murid', function ($q) {
+            $q->where('parent_id', auth()->id());
+        });
 
         $journals = $this->filteredQuery($request, $query)
             ->with(['coaching.murid:id,name', 'coaching.guru:id,name'])
@@ -276,6 +272,15 @@ class JournalController extends Controller
     private function validateJournalOwnership(Coaching $coaching, Journal $journal)
     {
         abort_if($journal->coaching_id !== $coaching->id, 404);
+    }
+
+    private function abortIfCompleted(Coaching $coaching)
+    {
+        abort_if(
+            $coaching->status === 'completed',
+            403,
+            'Coaching sudah selesai dan tidak dapat diubah.'
+        );
     }
 
     /*
