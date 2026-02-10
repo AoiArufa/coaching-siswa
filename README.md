@@ -109,118 +109,6 @@ Terdiri dari:
 ## Murid → Ortu
 
 Relasi many-to-many melalui:
-
-# 🎓 Sistem Program Coaching Siswa
-
-Sistem berbasis Laravel untuk mengelola program coaching siswa di sekolah, mencakup perencanaan, pelaksanaan, jurnal pencatatan, refleksi, rencana tindak lanjut, dan pelaporan kepada siswa serta orang tua.
-
----
-
-# 📌 Fitur Utama
-
-## Sistem Program Coaching
-
-### a. Visi dan Misi
-
-Menjadi sistem terstruktur untuk mendukung perkembangan siswa melalui coaching berbasis data dan refleksi.
-
-### b. SOP Coaching
-
-Alur kerja sistem:
-
-1. Perencanaan Coaching
-2. Pelaksanaan Sesi
-3. Pencatatan Jurnal
-4. Pemberian Materi
-5. Refleksi
-6. Rencana Tindak Lanjut
-7. Pelaporan
-
-### c. Perencanaan
-
-- Pembuatan coaching oleh guru
-- Menentukan murid
-- Menentukan tujuan
-- Status: draft / ongoing / completed
-
-### d. Pelaksanaan
-
-- Coaching stages (tahapan)
-- Coaching sessions
-- Tracking progress (% otomatis)
-
-### e. Jurnal Pencatatan
-
-- Input jurnal per sesi
-- Filter berdasarkan tanggal
-- Relasi ke coaching
-
-### f. Bahan Ajar
-
-- Upload materi
-- Relasi ke coaching
-- Disimpan per sesi
-
-### g. Refleksi
-
-Terdiri dari:
-
-- reflection
-- hasil_perkembangan
-- kendala
-- rencana_perbaikan
-
-### h. Rencana Tindak Lanjut
-
-- judul
-- rencana_tindak_lanjut
-- target_tanggal
-
-### i. Pelaporan
-
-- Rekap jurnal
-- Statistik bulanan
-- Summary coaching
-- Siap untuk export PDF (opsional)
-
----
-
-# 👥 Role Sistem
-
-| Role  | Hak Akses                |
-| ----- | ------------------------ |
-| Admin | Full akses               |
-| Guru  | Kelola coaching & jurnal |
-| Murid | Melihat coaching sendiri |
-| Ortu  | Melihat laporan anak     |
-
----
-
-# 🧱 Struktur Database
-
-## Tabel Utama
-
-- users
-- coachings
-- coaching_stages
-- coaching_sessions
-- journals
-- materials
-- reflections
-- follow_ups
-- parent_student (pivot)
-
----
-
-# 🔗 Relasi Sistem
-
-## Guru → Murid
-
-1 guru bisa memiliki banyak coaching.
-
-## Murid → Ortu
-
-Relasi many-to-many melalui:
 parent_student
 
 ## Coaching memiliki:
@@ -235,8 +123,8 @@ parent_student
 
 # 🚀 Cara Install
 
-### 1️⃣ Clone Project
 ```bash
+### 1️⃣ Clone Project
 git clone <repository-url>
 cd nama-project
 
