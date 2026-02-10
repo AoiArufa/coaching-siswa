@@ -6,7 +6,7 @@ Sistem berbasis Laravel untuk mengelola program coaching siswa di sekolah, menca
 
 # 📌 Fitur Utama
 
-## C.18 — Sistem Program Coaching
+## Sistem Program Coaching
 
 ### a. Visi dan Misi
 
