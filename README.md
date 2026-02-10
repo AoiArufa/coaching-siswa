@@ -148,17 +148,19 @@ php artisan migrate:fresh --seed
 ```
 
 ### 🧪 Akun Demo
-- 👨‍🏫 Guru
-- email: guru1@example.com
-- password: password
+```bash
+👨‍🏫 Guru
+email: guru1@example.com
+password: password
 
-- 👨‍🎓 Murid
-- email: murid1@example.com
-- password: password
+👨‍🎓 Murid
+email: murid1@example.com
+password: password
 
-- 👨‍👩‍👧 Ortu
-- email: ortu1@example.com
-- password: password
+👨‍👩‍👧 Ortu
+email: ortu1@example.com
+password: password
+```
 
 ### 📊 Data Demo yang Dibuat Seeder
 Seeder akan membuat:
@@ -224,5 +226,5 @@ ONLY_FULL_GROUP_BY
 
 
 
-#### 📄 Lisensi
+### 📄 Lisensi
 Untuk kebutuhan pembelajaran & pengembangan sistem sekolah.
