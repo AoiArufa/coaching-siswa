@@ -124,27 +124,28 @@ parent_student
 # 🚀 Cara Install
 
 ```bash
-### 1️⃣ Clone Project
+1️⃣ Clone Project
 git clone <repository-url>
 cd nama-project
 
-### 2️⃣ Install Dependency
+2️⃣ Install Dependency
 composer install
 
-### 3️⃣ Setup Environment
+3️⃣ Setup Environment
 cp .env.example .env
 php artisan key:generate
 
-### 4️⃣ Setup Database
+4️⃣ Setup Database
 
 Edit file .env
 
 DB_DATABASE=coaching_siswa
 DB_USERNAME=root
 DB_PASSWORD=
-```
-### 5️⃣ Migrasi + Seeder Demo
+
+5️⃣ Migrasi + Seeder Demo
 php artisan migrate:fresh --seed
+```
 
 🧪 Akun Demo
 👨‍🏫 Guru
