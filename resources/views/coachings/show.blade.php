@@ -35,6 +35,13 @@
                     </a>
                 @endif
 
+                @if ($coaching->status === 'completed' && !$coaching->reflection)
+                    <a href="{{ route('coachings.reflection.create', $coaching) }}"
+                        class="bg-green-600 text-white px-3 py-1 rounded">
+                        Isi Refleksi
+                    </a>
+                @endif
+
                 {{-- Tambah Sesi (Terkunci jika completed) --}}
                 @if ($coaching->status !== 'completed')
                     <a href="{{ route('sessions.create', $coaching) }}"

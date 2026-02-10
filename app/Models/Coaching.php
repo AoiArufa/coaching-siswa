@@ -62,4 +62,9 @@ class Coaching extends Model
     {
         return $this->hasMany(Material::class);
     }
+
+    public function reflection()
+    {
+        return $this->hasOne(Reflection::class);
+    }
 }

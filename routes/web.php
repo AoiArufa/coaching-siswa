@@ -6,6 +6,7 @@ use App\Http\Controllers\CoachingSessionController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\ReflectionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -128,6 +129,16 @@ Route::middleware('auth')->group(function () {
                 'coachings.materials',
                 \App\Http\Controllers\MaterialController::class
             )->except('show');
+
+            Route::get(
+                'coachings/{coaching}/reflection/create',
+                [ReflectionController::class, 'create']
+            )->name('coachings.reflection.create');
+
+            Route::post(
+                'coachings/{coaching}/reflection',
+                [ReflectionController::class, 'store']
+            )->name('coachings.reflection.store');
         });
 
     /*
