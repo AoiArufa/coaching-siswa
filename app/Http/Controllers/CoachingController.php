@@ -6,6 +6,7 @@ use App\Http\Requests\StoreCoachingRequest;
 use App\Models\Coaching;
 use App\Models\Journal;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -38,6 +39,32 @@ class CoachingController extends Controller
             'coachings',
             'totalCoachings',
             'totalJournals'
+        ));
+    }
+
+    public function finalReport(Coaching $coaching)
+    {
+        $this->authorize('view', $coaching);
+
+        $coaching->load([
+            'murid',
+            'guru',
+            'journals.user',
+            'followUps'
+        ]);
+
+        $totalJournals = $coaching->journals()->count();
+
+        $monthlyStats = $coaching->journals()
+            ->selectRaw('MONTH(tanggal) as month, COUNT(*) as total')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('total', 'month');
+
+        return view('reports.final', compact(
+            'coaching',
+            'totalJournals',
+            'monthlyStats'
         ));
     }
 
@@ -316,6 +343,21 @@ class CoachingController extends Controller
             'coaching',
             'journals'
         ));
+    }
+
+    public function exportFinalReport(Coaching $coaching)
+    {
+        $this->authorize('view', $coaching);
+
+        $coaching->load(['murid', 'guru', 'journals', 'followUps']);
+
+        $pdf = Pdf::loadView('pdf.final-report', [
+            'coaching' => $coaching
+        ])->setPaper('A4', 'portrait');
+
+        return $pdf->download(
+            'laporan-coaching-' . now()->format('Ymd-His') . '.pdf'
+        );
     }
 
     /*

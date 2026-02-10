@@ -74,7 +74,7 @@ class JournalController extends Controller
         }
 
         return redirect()
-            ->route('guru.coachings.show', $coaching)
+            ->route('coachings.show', $coaching)
             ->with('success', 'Jurnal berhasil ditambahkan.');
     }
 
@@ -108,7 +108,7 @@ class JournalController extends Controller
         $this->logActivity('update', $journal, 'Mengubah jurnal coaching');
 
         return redirect()
-            ->route('guru.coachings.show', $coaching)
+            ->route('coachings.show', $coaching)
             ->with('success', 'Jurnal berhasil diperbarui.');
     }
 
@@ -164,10 +164,10 @@ class JournalController extends Controller
     {
         $this->authorize('view', $coaching);
 
-        $data = $coaching->journals()
+        $data = Journal::where('coaching_id', $coaching->id)
             ->selectRaw('MONTH(tanggal) as month, COUNT(*) as total')
-            ->groupBy('month')
-            ->orderBy('month')
+            ->groupByRaw('MONTH(tanggal)')
+            ->orderByRaw('MONTH(tanggal) ASC')
             ->pluck('total', 'month');
 
         return view('journals.chart', compact('coaching', 'data'));

@@ -6,6 +6,7 @@ use App\Http\Controllers\CoachingSessionController;
 use App\Http\Controllers\JournalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MaterialController;
+use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReflectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -139,6 +140,26 @@ Route::middleware('auth')->group(function () {
                 'coachings/{coaching}/reflection',
                 [ReflectionController::class, 'store']
             )->name('coachings.reflection.store');
+
+            Route::get(
+                'coachings/{coaching}/followups/create',
+                [FollowUpController::class, 'create']
+            )->name('coachings.followups.create');
+
+            Route::post(
+                'coachings/{coaching}/followups',
+                [FollowUpController::class, 'store']
+            )->name('coachings.followups.store');
+
+            Route::patch(
+                'coachings/{coaching}/followups/{followUp}/status',
+                [FollowUpController::class, 'updateStatus']
+            )->name('coachings.followups.updateStatus');
+
+            Route::get(
+                '/coachings/{coaching}/final-report',
+                [CoachingController::class, 'finalReport']
+            )->name('coachings.final-report');
         });
 
     /*
@@ -230,6 +251,11 @@ Route::middleware('auth')->group(function () {
         '/coachings/{coaching}/journals/pdf',
         [JournalController::class, 'exportPdf']
     )->name('coachings.journals.pdf');
+
+    Route::get(
+        '/coachings/{coaching}/final-report/pdf',
+        [CoachingController::class, 'exportFinalReport']
+    )->name('coachings.final-report.pdf');
 
     Route::get(
         '/coachings/{coaching}/journals/chart',

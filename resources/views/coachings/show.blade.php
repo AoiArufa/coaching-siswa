@@ -42,6 +42,13 @@
                     </a>
                 @endif
 
+                @if ($coaching->status === 'completed')
+                    <a href="{{ route('coachings.followups.create', $coaching) }}"
+                        class="bg-blue-600 text-white px-3 py-1 rounded">
+                        Tambah RTL
+                    </a>
+                @endif
+
                 {{-- Tambah Sesi (Terkunci jika completed) --}}
                 @if ($coaching->status !== 'completed')
                     <a href="{{ route('sessions.create', $coaching) }}"
@@ -67,6 +74,15 @@
                         Selesaikan Coaching
                     </a>
                 @endif
+
+                <a href="{{ route('coachings.final-report.pdf', $coaching) }}"
+                    class="bg-green-600 text-white px-3 py-1 rounded">
+                    Export PDF FInal Report
+                </a>
+
+                <a href="{{ route('coachings.final-report', $coaching) }}" class="bg-gray-700 text-white px-3 py-1 rounded">
+                    Lihat Laporan FINAL
+                </a>
 
                 @if ($coaching->status === 'completed')
                     <a href="{{ route('coachings.report', $coaching) }}"
@@ -96,6 +112,24 @@
             </div>
         </div>
 
+        @if ($coaching->followUps->count())
+            <div class="mt-6">
+                <h2 class="font-bold mb-2">Rencana Tindak Lanjut</h2>
+
+                @foreach ($coaching->followUps as $rtl)
+                    <div class="border p-3 rounded mb-2">
+                        <div class="font-semibold">{{ $rtl->judul }}</div>
+                        <div class="text-sm">{{ $rtl->deskripsi }}</div>
+                        <div class="text-xs text-gray-500">
+                            Target: {{ $rtl->target_tanggal ?? '-' }}
+                        </div>
+                        <div class="text-xs">
+                            Status: {{ ucfirst($rtl->status) }}
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
 
         {{-- ================= SESSIONS PER STAGE ================= --}}
         <div class="mb-10">

@@ -55,7 +55,13 @@ class Coaching extends Model
 
     public function journals()
     {
-        return $this->hasMany(Journal::class)->orderBy('tanggal', 'desc');
+        return $this->hasMany(Journal::class);
+    }
+
+    public function journalsLatest()
+    {
+        return $this->hasMany(Journal::class)
+            ->orderBy('tanggal', 'desc');
     }
 
     public function materials()
@@ -66,5 +72,10 @@ class Coaching extends Model
     public function reflection()
     {
         return $this->hasOne(Reflection::class);
+    }
+
+    public function followUps()
+    {
+        return $this->hasMany(FollowUp::class);
     }
 }
