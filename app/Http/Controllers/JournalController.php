@@ -26,11 +26,22 @@ class JournalController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('journals.index', [
-            'coaching' => $coaching,
-            'journals' => $journals,
-            ...$this->filterParams($request),
-        ]);
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => route('redirect')],
+            ['label' => 'Coaching', 'url' => route('coachings.index')],
+            ['label' => $coaching->title, 'url' => route('coachings.show', $coaching->id)],
+            ['label' => 'Jurnal', 'url' => '']
+        ];
+
+        $journals = $coaching->journals;
+
+        return view('journals.index', compact('coaching', 'journals', 'breadcrumbs'));
+
+        // return view('journals.index', [
+        //     'coaching' => $coaching,
+        //     'journals' => $journals,
+        //     ...$this->filterParams($request),
+        // ]);
     }
 
     /*
@@ -43,7 +54,15 @@ class JournalController extends Controller
         $this->authorizeGuru($coaching);
         $this->abortIfCompleted($coaching);
 
-        return view('journals.create', compact('coaching'));
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => route('redirect')],
+            ['label' => 'Coaching', 'url' => route('coachings.index')],
+            ['label' => $coaching->title, 'url' => route('coachings.show', $coaching->id)],
+            ['label' => 'Jurnal', 'url' => route('journals.index', $coaching->id)],
+            ['label' => 'Tambah Jurnal', 'url' => '']
+        ];
+
+        return view('journals.create', compact('coaching', 'breadcrumbs'));
     }
 
     /*

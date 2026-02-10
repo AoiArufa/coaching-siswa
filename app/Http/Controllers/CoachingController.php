@@ -35,10 +35,16 @@ class CoachingController extends Controller
             $q->where('guru_id', auth()->id());
         })->count();
 
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => route('redirect')],
+            ['label' => 'Coaching', 'url' => '']
+        ];
+
         return view('dashboards.guru', compact(
             'coachings',
             'totalCoachings',
-            'totalJournals'
+            'totalJournals',
+            'breadcrumbs'
         ));
     }
 
@@ -202,12 +208,19 @@ class CoachingController extends Controller
 
         $progress = min($total * 10, 100);
 
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'url' => route('redirect')],
+            ['label' => 'Coaching', 'url' => route('coachings.index')],
+            ['label' => $coaching->title, 'url' => '']
+        ];
+
         return view('coachings.show', compact(
             'coaching',
             'journals',
             'sort',
             'summary',
-            'progress'
+            'progress',
+            'breadcrumbs'
         ));
     }
 

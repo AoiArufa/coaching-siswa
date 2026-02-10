@@ -53,6 +53,7 @@
 <body class="font-sans antialiased">
 
     @include('layouts.navigation')
+    @include('components.breadcrumb')
 
     <main class="py-6">
         @yield('content')
