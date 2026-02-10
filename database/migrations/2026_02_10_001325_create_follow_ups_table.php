@@ -15,7 +15,7 @@ return new class extends Migration {
                 ->cascadeOnDelete();
 
             $table->string('judul');
-            $table->text('deskripsi');
+            $table->text('rencana_tindak_lanjut');
             $table->date('target_tanggal')->nullable();
             $table->enum('status', ['planned', 'in_progress', 'done'])
                 ->default('planned');

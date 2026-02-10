@@ -10,16 +10,11 @@ return new class extends Migration
     {
         Schema::create('reflections', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('coaching_id')
-                ->constrained()
-                ->cascadeOnDelete();
-
-            $table->text('hasil_perkembangan');
-            $table->text('kendala');
-            $table->text('evaluasi_metode');
-            $table->text('catatan_guru')->nullable();
-
+            $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
+            $table->text('reflection');
+            $table->text('hasil_perkembangan')->nullable();
+            $table->text('kendala')->nullable();
+            $table->text('rencana_perbaikan')->nullable();
             $table->timestamps();
         });
     }

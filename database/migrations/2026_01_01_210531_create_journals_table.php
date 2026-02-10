@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->id();
                 $table->foreignId('coaching_id')->constrained()->cascadeOnDelete();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-                $table->date('tanggal')->index();
+                $table->date('tanggal');
                 $table->text('catatan');
                 $table->text('refleksi')->nullable();
                 $table->index('tanggal');               // Untuk filter by date, tambahan jika perlu
