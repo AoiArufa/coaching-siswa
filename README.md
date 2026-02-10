@@ -147,21 +147,20 @@ DB_PASSWORD=
 php artisan migrate:fresh --seed
 ```
 
-🧪 Akun Demo
-👨‍🏫 Guru
-email: guru1@example.com
-password: password
+### 🧪 Akun Demo
+- 👨‍🏫 Guru
+- email: guru1@example.com
+- password: password
 
-👨‍🎓 Murid
-email: murid1@example.com
-password: password
+- 👨‍🎓 Murid
+- email: murid1@example.com
+- password: password
 
-👨‍👩‍👧 Ortu
-email: ortu1@example.com
-password: password
+- 👨‍👩‍👧 Ortu
+- email: ortu1@example.com
+- password: password
 
-📊 Data Demo yang Dibuat Seeder
-
+### 📊 Data Demo yang Dibuat Seeder
 Seeder akan membuat:
 - 2 Guru
 - 3 Murid
@@ -174,7 +173,8 @@ Seeder akan membuat:
 - 2 Rencana Tindak Lanjut
 Sehingga halaman laporan langsung bisa diuji.
 
-📁 Struktur Folder Penting
+### 📁 Struktur Folder Penting
+```bash
 app/
  ├── Models/
  ├── Http/Controllers/
@@ -183,8 +183,9 @@ database/
  ├── seeders/
 resources/
  ├── views/
+ ```
 
-📈 Laporan Coaching (C.19)
+### 📈 Laporan Coaching
 
 Fitur:
 - Filter by tanggal
@@ -195,35 +196,33 @@ Fitur:
 Query laporan sudah kompatibel dengan:
 ONLY_FULL_GROUP_BY
 
-⚙️ Status Enum Coaching
-draft
-ongoing
-completed
+### ⚙️ Status Enum Coaching
+- draft
+- ongoing
+- completed
 
-🛠 Teknologi
+### 🛠 Teknologi
 - Laravel 12
 - MySQL
 - Blade Template
 - Eloquent ORM
 
-🧠 Catatan Teknis
+### 🧠 Catatan Teknis
+- ✔ Database strict mode aktif
+- ✔ Seeder idempotent
+- ✔ Relasi sudah sinkron
+- ✔ Foreign key cascade aktif
 
-✔ Database strict mode aktif
-✔ Seeder idempotent
-✔ Relasi sudah sinkron
-✔ Foreign key cascade aktif
-
-📌 Roadmap Pengembangan
+### 📌 Roadmap Pengembangan
 - Export PDF laporan
 - Grafik statistik
 - Notifikasi ke orang tua
 - Approval sistem
 - Dashboard analytics
 
-👨‍💻 Developer
+### 👨‍💻 Developer
 
 
 
-📄 Lisensi
-
+#### 📄 Lisensi
 Untuk kebutuhan pembelajaran & pengembangan sistem sekolah.
